@@ -42,14 +42,9 @@ function ContactForm({ addContact, contacts }) {
     };
 
     addContact(newContact);
-    this.setState({
-      name: '',
-      number: '',
-    });
+    setName ('');
+    setNumber ('');
   };
-
-
-  // const { name, number } = this.state;
 
   return (
     <Form onSubmit={handleSubmit}>
