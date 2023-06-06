@@ -57,7 +57,7 @@ const deleteContact = (id) => {
       <ContactForm addContact={addContact} contacts={contacts} />
 
       <Heading2>Contacts</Heading2>
-      <Filter filter={filter} setFilterh={setFilter} />
+      <Filter filter={filter} setFilter={setFilter} />
       <ContactList contacts={filteredContacts} deleteContact={deleteContact} />
     </Container>
   );
