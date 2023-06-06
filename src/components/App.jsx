@@ -1,83 +1,66 @@
-import React, { Component } from 'react';
+import { useState, useEffect } from 'react';
 import ContactForm from "./ContactForm/ContactForm";
 import ContactList from "./ContactList/ContactList"
 import Filter from "./Filter/Filter"
+import Notiflix from 'notiflix';
 import { Container, Title, Heading2 } from './App.styled'
 
-class App extends Component {
-  state = {
-    contacts: [
-      { id: 'id-1', name: 'Rosie Simpson', number: '459-12-56' },
-      { id: 'id-2', name: 'Hermione Kline', number: '443-89-12' },
-      { id: 'id-3', name: 'Eden Clements', number: '645-17-79' },
-      { id: 'id-4', name: 'Annie Copeland', number: '227-91-26' },
-    ],
-    filter: ''
-  }
 
-  // const [contacts, setContacts] = useState([
-  //   { id: 'id-1', name: 'Rosie Simpson', number: '459-12-56' },
-  //   { id: 'id-2', name: 'Hermione Kline', number: '443-89-12' },
-  //   { id: 'id-3', name: 'Eden Clements', number: '645-17-79' },
-  //   { id: 'id-4', name: 'Annie Copeland', number: '227-91-26' },
-  // ]);
-  // const [filter, setFilter] = useState('');
-  
-  componentDidMount() { 
-    const contacts = localStorage.getItem('contacts');
-    const parseContacts = JSON.parse(contacts);
+const initialContactsList = [
+  { id: 'id-1', name: 'Rosie Simpson', number: '459-12-56' },
+  { id: 'id-2', name: 'Hermione Kline', number: '443-89-12' },
+  { id: 'id-3', name: 'Eden Clements', number: '645-17-79' },
+  { id: 'id-4', name: 'Annie Copeland', number: '227-91-26' },
+];
 
-    if (parseContacts) {
-      this.setState({ contacts: parseContacts })
-    }    
-  }
+function App() {
 
-  componentDidUpdate(prevState) {
-  
-    if (this.state.contacts !== prevState.contacts) {
-    localStorage.setItem('contacts', JSON.stringify(this.state.contacts))
-  }
-}
+  const [contacts, setContacts] = useState(
+    () => JSON.parse(localStorage.getItem('contacts')) ?? (initialContactsList)
+  );
+  const [filter, setFilter] = useState('');
 
-  addContact = (newContact) => {
-    this.setState((prevState) => ({
-      contacts: [...prevState.contacts, newContact]
-    }));
-  };
+  useEffect(() => {
+    localStorage.setItem('contacts', JSON.stringify(contacts));
+  }, [contacts]);
 
-  deleteContact = (id) => {
-    this.setState((prevState) => ({
-      contacts: prevState.contacts.filter((contact) => contact.id !== id)
-    }));
-  };
+  const addContact = (newContact) => {
 
-  setFilter = (filterValue) => {
-    this.setState({
-      filter: filterValue
-    });
-  };
-
-  filteredContacts = () => {
-    const { contacts, filter } = this.state;
-    return contacts.filter((contact) =>
-      contact.name.toLowerCase().includes(filter.toLowerCase())
-    )
-  }
-
-  render() {
-    const { contacts, filter } = this.state;
-
-    return (
-      <Container>
-        <Title>Phonebook</Title>
-        <ContactForm addContact={this.addContact} contacts={contacts} />
-
-        <Heading2>Contacts</Heading2>
-        <Filter filter={filter} setFilter={this.setFilter} />
-        <ContactList contacts={this.filteredContacts()} deleteContact={this.deleteContact} />
-      </Container>
+      const existingContact = contacts.find(
+      (contact) => contact.name.toLowerCase() === newContact.name.toLowerCase()
     );
-  }
+    if (existingContact) {
+      Notiflix.Report.warning(
+        'Alert',
+        `Contact with name ${newContact.name} already exists!`,
+        'Ok'
+      );      
+      return;
+    }
+    
+  setContacts((prevContacts) => [...prevContacts, newContact]);  
+};
+
+const deleteContact = (id) => {
+  setContacts((prevContacts) =>
+    prevContacts.filter((contact) => contact.id !== id)
+  );  
+};
+
+  const filteredContacts = contacts.filter((contact) =>
+    contact.name.toLowerCase().includes(filter.toLowerCase())
+  );
+
+  return (
+    <Container>
+      <Title>Phonebook</Title>
+      <ContactForm addContact={addContact} contacts={contacts} />
+
+      <Heading2>Contacts</Heading2>
+      <Filter filter={filter} setFilterh={setFilter} />
+      <ContactList contacts={filteredContacts} deleteContact={deleteContact} />
+    </Container>
+  );
 }
 
 export default App;
